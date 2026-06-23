@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
+import logoImg from '/logo.png'
 
 const navItems = [
   { to: '/', icon: Home, label: '公司主页' },
@@ -50,10 +51,10 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="h-16 flex items-center justify-center border-b border-white/20 px-4">
         {collapsed ? (
-          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-8 h-8 rounded-lg" />
+          <img src={logoImg} alt="归宁" className="w-8 h-8 rounded-lg" />
         ) : (
           <div className="flex items-center gap-2">
-            <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-8 h-8 rounded-lg" />
+            <img src={logoImg} alt="归宁" className="w-8 h-8 rounded-lg" />
             <span className="font-semibold text-gray-400 text-base">归宁</span>
           </div>
         )}

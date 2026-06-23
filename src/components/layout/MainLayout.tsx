@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import TopNav from './TopNav'
+import pageBg from '/page-bg.png'
 
 export default function MainLayout() {
   return (
@@ -9,7 +10,7 @@ export default function MainLayout() {
         <div
           className="fixed inset-0 top-14 z-0"
           style={{
-            backgroundImage: `url(${import.meta.env.BASE_URL}page-bg.png)`,
+            backgroundImage: `url(${pageBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',

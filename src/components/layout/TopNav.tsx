@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, Newspaper, Users, MessageCircle, User, Shield, LogOut, Bell, Phone } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import logoImg from '/logo.png'
 import { useUIStore } from '../../store/uiStore'
 
 const navItems = [
@@ -34,7 +35,7 @@ export default function TopNav() {
     <header className="h-14 bg-transparent border-b border-white/20 flex items-center px-4 flex-shrink-0">
       {/* Logo */}
       <NavLink to="/" className="flex items-center gap-2 mr-8 flex-shrink-0">
-        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-8 h-8 rounded-lg" />
+        <img src={logoImg} alt="归宁" className="w-8 h-8 rounded-lg" />
         <span className="font-semibold text-gray-500 text-base">归宁</span>
       </NavLink>
 

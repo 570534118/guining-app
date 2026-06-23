@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import logoImg from '/logo.png'
+import loginBg from '/login-bg.png'
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('')
@@ -52,12 +54,12 @@ export default function RegisterPage() {
     <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${import.meta.env.BASE_URL}login-bg.png) center/cover no-repeat`
+        background: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${loginBg}) center/cover no-repeat`
       }}
     >
       <div className="rounded-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-16 h-16 rounded-2xl mx-auto mb-4" />
+          <img src={logoImg} alt="归宁" className="w-16 h-16 rounded-2xl mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-white">创建账号</h1>
           <p className="text-white/70 mt-1">加入归宁</p>
         </div>
