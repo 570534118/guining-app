@@ -50,10 +50,10 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="h-16 flex items-center justify-center border-b border-white/20 px-4">
         {collapsed ? (
-          <img src="/logo.png" alt="归宁" className="w-8 h-8 rounded-lg" />
+          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-8 h-8 rounded-lg" />
         ) : (
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="归宁" className="w-8 h-8 rounded-lg" />
+            <img src={import.meta.env.BASE_URL + 'logo.png'} alt="归宁" className="w-8 h-8 rounded-lg" />
             <span className="font-semibold text-gray-400 text-base">归宁</span>
           </div>
         )}

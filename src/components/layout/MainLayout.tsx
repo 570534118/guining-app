@@ -9,7 +9,7 @@ export default function MainLayout() {
         <div
           className="fixed inset-0 top-14 z-0"
           style={{
-            backgroundImage: "url('/page-bg.png')",
+            backgroundImage: `url(${import.meta.env.BASE_URL}page-bg.png)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
