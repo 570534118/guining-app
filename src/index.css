@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  background-color: #F5F7FA;
+  color: #1A1A1A;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
+
+/* 通用卡片 */
+.card {
+  @apply bg-transparent rounded-card shadow-sm border border-white/25;
+}
+
+/* 主按钮 - 绿色 */
+.btn-primary {
+  @apply bg-primary-500 text-white px-4 py-2 rounded-btn hover:bg-primary-600 active:bg-primary-700 transition-colors duration-200 font-medium;
+}
+
+.btn-outline {
+  @apply border border-primary-500 text-primary-500 px-4 py-2 rounded-btn hover:bg-primary-50 active:bg-primary-100 transition-colors duration-200 font-medium;
+}
+
+/* 输入框 */
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-btn focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition-all duration-200;
+}
+
+/* 绿色渐变背景 */
+.bg-gradient-green {
+  background: linear-gradient(135deg, #166534 0%, #22C55E 50%, #86EFAC 100%);
+}
