@@ -1,0 +1,15 @@
+{
+  "name": "归宁",
+  "short_name": "归宁",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F0FDF4",
+  "theme_color": "#15803D",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
