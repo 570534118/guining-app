@@ -19,6 +19,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://afmxpgfajeznpaqitfuu.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_myiFLajs_MpdYBS_UqgmAg_ukOnI07o
+          BASE_URL: /guining-app/
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

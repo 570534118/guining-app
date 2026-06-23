@@ -2,11 +2,17 @@ Set WshShell = CreateObject("WScript.Shell")
 Set FSO = CreateObject("Scripting.FileSystemObject")
 AppDir = FSO.GetParentFolderName(WScript.ScriptFullName)
 
-' 静默启动 Node.js 服务器（不弹终端）
-WshShell.Run "node """ & AppDir & "\server.js""", 0, False
+' 关闭已有的 Edge 进程（确保 --app 模式生效）
+WshShell.Run "taskkill /f /im msedge.exe", 0, True
+WScript.Sleep 1000
 
-' 等待服务器启动
-WScript.Sleep 2000
+' 用完整路径启动 Node
+NodeExe = "C:\Program Files\nodejs\node.exe"
+If Not FSO.FileExists(NodeExe) Then NodeExe = "node"
 
-' 全屏打开 Edge
-WshShell.Run "msedge --app=http://localhost:5173 --start-fullscreen --window-size=1920,1080", 1, False
+' 静默启动服务器
+WshShell.Run """" & NodeExe & """ """ & AppDir & "\server.js""", 0, False
+WScript.Sleep 2500
+
+' 以独立应用窗口打开
+WshShell.Run "msedge --new-window --app=http://localhost:5173 --start-maximized", 1, False
