@@ -15,7 +15,6 @@ export default function FeedPage() {
   const [showComments, setShowComments] = useState<Record<number, boolean>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 获取所有动态
   const { data: posts, isLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
@@ -28,30 +27,22 @@ export default function FeedPage() {
     },
   })
 
-  // 获取评论
-  const fetchComments = async (postId: number) => {
-    const { data } = await supabase
-      .from('comments')
-      .select('*, author:profiles(*)')
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true })
-    return (data || []) as (Comment & { author: any })[]
-  }
-
-  // 发动态
   const createPost = useMutation({
     mutationFn: async () => {
       let imageUrl: string | null = null
 
       if (selectedImage) {
-        const fileName = `${user!.id}/${Date.now()}-${selectedImage.name}`
+        const ext = selectedImage.name.split('.').pop() || 'jpg'
+        const safeName = Date.now() + '.' + ext
+        const fileName = `${user!.id}/${safeName}`
         const { error: uploadError } = await supabase.storage
           .from('post-images')
           .upload(fileName, selectedImage)
-        if (!uploadError) {
-          const { data: urlData } = supabase.storage.from('post-images').getPublicUrl(fileName)
-          imageUrl = urlData.publicUrl
+        if (uploadError) {
+          throw new Error(uploadError.message)
         }
+        const { data: urlData } = supabase.storage.from('post-images').getPublicUrl(fileName)
+        imageUrl = urlData.publicUrl
       }
 
       const { error } = await supabase.from('posts').insert({
@@ -67,9 +58,11 @@ export default function FeedPage() {
       setPreviewUrl(null)
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
+    onError: (error: Error) => {
+      alert('发布失败: ' + JSON.stringify(error.message || error))
+    },
   })
 
-  // 发评论
   const addComment = useMutation({
     mutationFn: async ({ postId, comment }: { postId: number; comment: string }) => {
       const { error } = await supabase.from('comments').insert({
@@ -85,7 +78,6 @@ export default function FeedPage() {
     },
   })
 
-  // 删除动态
   const deletePost = useMutation({
     mutationFn: async (postId: number) => {
       await supabase.from('posts').delete().eq('id', postId)
@@ -103,7 +95,7 @@ export default function FeedPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!content.trim()) return
+    if (!content.trim() && !selectedImage) return
     createPost.mutate()
   }
 
@@ -115,7 +107,6 @@ export default function FeedPage() {
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold text-gray-500 mb-6">公共动态</h1>
 
-      {/* 发布动态 */}
       <div className="card p-4 mb-6">
         <form onSubmit={handleSubmit}>
           <textarea
@@ -154,7 +145,7 @@ export default function FeedPage() {
             </button>
             <button
               type="submit"
-              disabled={!content.trim() || createPost.isPending}
+              disabled={(!content.trim() && !selectedImage) || createPost.isPending}
               className="btn-primary flex items-center gap-1 text-sm"
             >
               <Send size={16} /> 发布
@@ -163,7 +154,6 @@ export default function FeedPage() {
         </form>
       </div>
 
-      {/* 动态列表 */}
       {isLoading ? (
         <div className="text-center text-gray-500/50 py-12">加载中...</div>
       ) : posts?.length === 0 ? (
@@ -208,7 +198,6 @@ export default function FeedPage() {
                 </button>
               </div>
 
-              {/* 评论区 */}
               {showComments[post.id] && (
                 <div className="mt-3 pt-3 border-t border-gray-50">
                   <CommentSection

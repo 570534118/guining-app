@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
-import logoImg from '/logo.png'
+import logoImg from '/logo.webp'
 
 const navItems = [
   { to: '/', icon: Home, label: '公司主页' },

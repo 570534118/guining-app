@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import TopNav from './TopNav'
-import pageBg from '/page-bg.png'
+import pageBg from '/page-bg.webp'
 
 export default function MainLayout() {
   return (

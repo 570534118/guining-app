@@ -64,6 +64,15 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 7. 公告表
+CREATE TABLE IF NOT EXISTS announcements (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- 索引 (加速查询)
 -- ============================================
@@ -79,6 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
+CREATE INDEX IF NOT EXISTS idx_announcements_created ON announcements(created_at DESC);
 
 -- ============================================
 -- 自动创建 profiles 的触发器 (注册时自动创建)
@@ -110,6 +120,7 @@ ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
 
 -- profiles: 所有人可读，本人可修改
 CREATE POLICY "Profiles are viewable by everyone" ON profiles
@@ -155,6 +166,22 @@ CREATE POLICY "Users can view own notifications" ON notifications
 CREATE POLICY "System can create notifications" ON notifications
   FOR INSERT WITH CHECK (true);
 
+-- announcements: 所有人可读，仅管理员可增删改
+CREATE POLICY "Announcements are viewable by everyone" ON announcements
+  FOR SELECT USING (true);
+CREATE POLICY "Admins can insert announcements" ON announcements
+  FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+  );
+CREATE POLICY "Admins can update announcements" ON announcements
+  FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+  );
+CREATE POLICY "Admins can delete announcements" ON announcements
+  FOR DELETE USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+  );
+
 -- ============================================
 -- 启用 Supabase Realtime (实时订阅)
 -- ============================================
@@ -166,6 +193,29 @@ ALTER PUBLICATION supabase_realtime ADD TABLE comments;
 -- ============================================
 -- 存储桶创建说明 (在 Supabase Dashboard > Storage 中手动创建)
 -- ============================================
--- 1. 创建 'avatars' 存储桶 (公开)
--- 2. 创建 'post-images' 存储桶 (公开)
--- 3. 两个桶的权限设置为公开读取
+-- 1. 在 Storage 中创建 'avatars' 存储桶 (公开)
+-- 2. 在 Storage 中创建 'post-images' 存储桶 (公开)
+
+-- ============================================
+-- Storage 存储桶 RLS 策略 (确保图片上传和读取正常)
+-- ============================================
+
+-- post-images: 允许已登录用户上传图片 (用 auth.uid() 代替 auth.role()，兼容性更好)
+CREATE POLICY "允许用户上传图片" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'post-images' AND auth.uid() IS NOT NULL
+  );
+
+-- post-images: 允许公开读取图片
+CREATE POLICY "公开查看图片" ON storage.objects
+  FOR SELECT USING (bucket_id = 'post-images');
+
+-- avatars: 允许已登录用户上传头像
+CREATE POLICY "允许用户上传头像" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'avatars' AND auth.uid() IS NOT NULL
+  );
+
+-- avatars: 允许公开读取头像
+CREATE POLICY "公开查看头像" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');

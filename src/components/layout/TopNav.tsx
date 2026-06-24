@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, Newspaper, Users, MessageCircle, User, Shield, LogOut, Bell, Phone } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
-import logoImg from '/logo.png'
+import logoImg from '/logo.webp'
 import { useUIStore } from '../../store/uiStore'
 
 const navItems = [

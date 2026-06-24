@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
-import logoImg from '/logo.png'
-import loginBg from '/login-bg.png'
+import logoImg from '/logo.webp'
+import loginBg from '/login-bg.webp'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')

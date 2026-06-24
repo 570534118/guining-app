@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import logoImg from '/logo.png'
-import loginBg from '/login-bg.png'
+import logoImg from '/logo.webp'
+import loginBg from '/login-bg.webp'
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('')

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, FileText, MessageSquare, Trash2, Shield } from 'lucide-react'
+import { Users, FileText, MessageSquare, Trash2, Shield, Megaphone, Plus, Edit } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
-import type { Profile, Post, Comment } from '../types'
+import type { Profile, Post, Comment, Announcement } from '../types'
 
-type Tab = 'users' | 'posts' | 'comments'
+type Tab = 'users' | 'posts' | 'comments' | 'announcements'
 
 export default function AdminPage() {
   const user = useAuthStore((s) => s.user)
@@ -29,6 +29,7 @@ export default function AdminPage() {
           { key: 'users' as Tab, icon: Users, label: '用户管理' },
           { key: 'posts' as Tab, icon: FileText, label: '动态管理' },
           { key: 'comments' as Tab, icon: MessageSquare, label: '评论管理' },
+          { key: 'announcements' as Tab, icon: Megaphone, label: '公告管理' },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -48,6 +49,7 @@ export default function AdminPage() {
       {activeTab === 'users' && <UserManagement />}
       {activeTab === 'posts' && <PostManagement />}
       {activeTab === 'comments' && <CommentManagement />}
+      {activeTab === 'announcements' && <AnnouncementManagement />}
     </div>
   )
 }
@@ -241,6 +243,170 @@ function CommentManagement() {
       ))}
       {comments?.length === 0 && (
         <div className="text-center text-gray-500/50 py-8">暂无评论</div>
+      )}
+    </div>
+  )
+}
+
+function AnnouncementManagement() {
+  const queryClient = useQueryClient()
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newContent, setNewContent] = useState('')
+
+  const { data: announcements, isLoading } = useQuery({
+    queryKey: ['admin-announcements'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+      return (data || []) as Announcement[]
+    },
+  })
+
+  const createMutation = useMutation({
+    mutationFn: async (item: { title: string; content: string }) => {
+      const { error } = await supabase.from('announcements').insert(item)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-announcements'] })
+      setShowCreate(false)
+      setNewTitle('')
+      setNewContent('')
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: async (item: { id: number; title: string; content: string }) => {
+      const { error } = await supabase
+        .from('announcements')
+        .update({ title: item.title, content: item.content, updated_at: new Date().toISOString() })
+        .eq('id', item.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-announcements'] })
+      setEditingId(null)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase.from('announcements').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-announcements'] }),
+  })
+
+  if (isLoading) return <div className="text-center py-8 text-gray-500/50">加载中...</div>
+
+  return (
+    <div className="space-y-3">
+      {!showCreate && (
+        <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-1 text-sm">
+          <Plus size={16} /> 新建公告
+        </button>
+      )}
+
+      {showCreate && (
+        <div className="card p-4">
+          <input
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-primary-300"
+            placeholder="公告标题"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+          />
+          <textarea
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 min-h-[120px] focus:outline-none focus:border-primary-300"
+            placeholder="公告内容（支持换行）"
+            value={newContent}
+            onChange={(e) => setNewContent(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => createMutation.mutate({ title: newTitle, content: newContent })}
+              disabled={!newTitle.trim() || createMutation.isPending}
+              className="btn-primary text-sm"
+            >
+              {createMutation.isPending ? '发布中...' : '发布'}
+            </button>
+            <button
+              onClick={() => { setShowCreate(false); setNewTitle(''); setNewContent('') }}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {announcements?.map((a) => (
+        <div key={a.id} className="card p-4">
+          {editingId === a.id ? (
+            <>
+              <input
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-primary-300"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+              <textarea
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 min-h-[120px] focus:outline-none focus:border-primary-300"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => updateMutation.mutate({ id: a.id, title: editTitle, content: editContent })}
+                  disabled={!editTitle.trim() || updateMutation.isPending}
+                  className="btn-primary text-sm"
+                >
+                  {updateMutation.isPending ? '保存中...' : '保存'}
+                </button>
+                <button
+                  onClick={() => setEditingId(null)}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  取消
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-800">{a.title}</h3>
+                  <p className="text-xs text-gray-500/50 mt-1">
+                    {new Date(a.created_at).toLocaleDateString('zh-CN')}
+                    {a.updated_at !== a.created_at ? ' (已编辑)' : ''}
+                  </p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0 ml-4">
+                  <button
+                    onClick={() => { setEditingId(a.id); setEditTitle(a.title); setEditContent(a.content) }}
+                    className="text-gray-300 hover:text-primary-500 transition-colors"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => { if (confirm('确定删除这条公告？')) deleteMutation.mutate(a.id) }}
+                    className="text-gray-300 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500/70 mt-2 line-clamp-3">{a.content}</p>
+            </>
+          )}
+        </div>
+      ))}
+      {announcements?.length === 0 && !showCreate && (
+        <div className="text-center text-gray-500/50 py-8">暂无公告</div>
       )}
     </div>
   )

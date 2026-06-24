@@ -69,6 +69,15 @@ export interface Notification {
   created_at: string;
 }
 
+// 公告
+export interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // 公司文化内容
 export interface CompanyContent {
   id: number;

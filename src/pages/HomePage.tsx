@@ -1,6 +1,21 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../lib/supabase'
+import type { Announcement } from '../types'
 
 export default function HomePage() {
+  const { data: announcements } = useQuery({
+    queryKey: ['home-announcements'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('announcements')
+        .select('id, title, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      return (data || []) as Pick<Announcement, 'id' | 'title' | 'created_at'>[]
+    },
+  })
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Banner */}
@@ -48,18 +63,24 @@ export default function HomePage() {
           公司公告
         </h2>
         <div className="space-y-3">
-          <Link to="/announcement/1" className="block border-l-4 border-primary-500 pl-4 py-2 hover:bg-gray-50/50 rounded-r-lg transition-colors cursor-pointer">
-            <h3 className="font-medium text-gray-800">殡葬管理条例</h3>
-            <p className="text-sm text-gray-500 mt-1">发布于 2026-03-13</p>
-          </Link>
-          <Link to="/announcement/2" className="block border-l-4 border-gray-300 pl-4 py-2 hover:bg-gray-50/50 rounded-r-lg transition-colors cursor-pointer">
-            <h3 className="font-medium text-gray-800">关于我司业务主管的任命决定</h3>
-            <p className="text-sm text-gray-500 mt-1">发布于 2026-03-05</p>
-          </Link>
-          <Link to="/announcement/3" className="block border-l-4 border-gray-300 pl-4 py-2 hover:bg-gray-50/50 rounded-r-lg transition-colors cursor-pointer">
-            <h3 className="font-medium text-gray-800">关于我司总裁的任命决定</h3>
-            <p className="text-sm text-gray-500 mt-1">发布于 2026-02-15</p>
-          </Link>
+          {announcements && announcements.length > 0 ? (
+            announcements.map((a, i) => (
+              <Link
+                key={a.id}
+                to={`/announcement/${a.id}`}
+                className={`block border-l-4 pl-4 py-2 hover:bg-gray-50/50 rounded-r-lg transition-colors cursor-pointer ${
+                  i === 0 ? 'border-primary-500' : 'border-gray-300'
+                }`}
+              >
+                <h3 className="font-medium text-gray-800">{a.title}</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  发布于 {new Date(a.created_at).toLocaleDateString('zh-CN')}
+                </p>
+              </Link>
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">暂无公告</p>
+          )}
         </div>
       </div>
     </div>
